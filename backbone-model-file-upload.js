@@ -37,7 +37,7 @@
   var BackboneModelFileUpload = Backbone.Model.extend({
 
     // ! Default file attribute - can be overwritten
-    fileAttribute: 'file',
+    fileAttributes: ['file'],
 
     // @ Save - overwritten
     save: function(key, val, options) {
@@ -71,23 +71,30 @@
       }
 
       // Check for "formData" flag and check for if file exist.
-      if ( options.formData === true
-        || options.formData !== false
-        && mergedAttrs[ this.fileAttribute ]
-        && mergedAttrs[ this.fileAttribute ] instanceof File
-        || mergedAttrs[ this.fileAttribute ] instanceof FileList
-        || mergedAttrs[ this.fileAttribute ] instanceof Blob ) {
+      var hasFileAttributes;
 
+      _.each(this.fileAttributes, function(attr) {
+        if ( options.formData === true
+          || options.formData !== false
+          && mergedAttrs[ attr ]
+          && mergedAttrs[ attr ] instanceof File
+          || mergedAttrs[ attr ] instanceof FileList
+          || mergedAttrs[ attr ] instanceof Blob )
+          hasFileAttributes = true;
+      });
+
+      if ( hasFileAttributes ) {
         // Flatten Attributes reapplying File Object
-        var formAttrs = _.clone( mergedAttrs ),
-          fileAttr = mergedAttrs[ this.fileAttribute ];
+        var formAttrs = _.clone( mergedAttrs );
+        var fileAttrs = _.pick(mergedAttrs, this.fileAttributes);
+
         formAttrs = this._flatten( formAttrs );
-        formAttrs[ this.fileAttribute ] = fileAttr;
+        formAttrs = _.extend(formAttrs, fileAttrs);
 
         // Converting Attributes to Form Data
         var formData = new FormData();
         _.each( formAttrs, function( value, key ){
-          if (value instanceof FileList || (key === that.fileAttribute && value instanceof Array)) {
+          if (value instanceof FileList || (that.fileAttributes.indexOf(key) > -1 && value instanceof Array)) {
             _.each(value, function(file) {
               formData.append( key, file );
             });
