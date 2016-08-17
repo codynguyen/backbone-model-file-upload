@@ -33,8 +33,7 @@
   // Clone the original Backbone.Model.prototype as superClass
   var _superClass = _.clone( Backbone.Model.prototype );
 
-  // Extending out
-  var BackboneModelFileUpload = Backbone.Model.extend({
+  Backbone.FileModel = Backbone.Model.extend({
 
     // ! Default file attribute - can be overwritten
     fileAttributes: ['file'],
@@ -176,8 +175,5 @@
       }
     }
   });
-
-  // Export out to override Backbone Model
-  Backbone.Model = BackboneModelFileUpload;
 
 }));
